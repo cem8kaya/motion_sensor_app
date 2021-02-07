@@ -24,6 +24,8 @@ dependencies:
   flutter:
     sdk: flutter
   sensors: ^0.4.2+6
+  flutter_local_notifications: ^4.0.0
+  audioplayers: ^0.8.0
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -48,9 +50,13 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+  #  - images/a_dot_burr.jpeg
+  #  - images/a_dot_ham.jpeg
+    - Handbell-sound.mp3
+    - DeskBell.mp3
+    - bell.png
+    - 1012.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
