@@ -64,6 +64,8 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
+
+          // Snake Widget
           // Center(
           //   child: DecoratedBox(
           //     decoration: BoxDecoration(
