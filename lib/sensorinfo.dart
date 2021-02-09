@@ -10,6 +10,10 @@ import 'package:sensors/sensors.dart';
 
 // import 'snake.dart';
 
+//AlertPart Added
+import "package:audioplayers/audio_cache.dart";
+import 'package:audioplayers/audioplayers.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -47,6 +51,16 @@ class _MyHomePageState extends State<MyHomePage> {
   List<StreamSubscription<dynamic>> _streamSubscriptions =
       <StreamSubscription<dynamic>>[];
 
+  //AlertPart Added
+  AudioCache audioCache = new AudioCache();
+  AudioPlayer _audioPlayer;
+  bool _bellSwitch = false;
+  Color _bellColor = Colors.black54;
+  bool _isPlaying = false;
+  void _playDingOnce() async {
+    audioCache.play('DeskBell.mp3');
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<String> accelerometer =
@@ -64,7 +78,6 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-
           // Snake Widget
           // Center(
           //   child: DecoratedBox(
@@ -129,10 +142,18 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    _streamSubscriptions.add(accelerometerEvents.listen((AccelerometerEvent event) {
+    _streamSubscriptions
+        .add(accelerometerEvents.listen((AccelerometerEvent event) {
       setState(() {
         _accelerometerValues = <double>[event.x, event.y, event.z];
       });
+
+      //AlertPart Added
+      if (_bellSwitch) {
+        if (event.x > 0.1 || event.x < -0.1) {
+          _playDingOnce();
+        }
+      }
     }));
 
     _streamSubscriptions.add(gyroscopeEvents.listen((GyroscopeEvent event) {
@@ -140,15 +161,12 @@ class _MyHomePageState extends State<MyHomePage> {
         _gyroscopeValues = <double>[event.x, event.y, event.z];
       });
     }));
-    
-    _streamSubscriptions.add(
-      userAccelerometerEvents.listen(
-        (UserAccelerometerEvent event) {
+
+    _streamSubscriptions
+        .add(userAccelerometerEvents.listen((UserAccelerometerEvent event) {
       setState(() {
         _userAccelerometerValues = <double>[event.x, event.y, event.z];
       });
-    }
-    )
-    );
+    }));
   }
 }
