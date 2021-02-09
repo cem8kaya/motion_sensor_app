@@ -58,6 +58,21 @@ class _MyHomePageState extends State<MyHomePage> {
     audioCache.play('DeskBell.mp3');
   }
 
+  void _playBellSound() async {
+    if (_isPlaying == false) {
+      setState(() => _isPlaying = true);
+      audioCache.play('Handbell-sound.mp3').then((audioPlayer) {
+        setState(() => _audioPlayer = audioPlayer);
+        audioPlayer.completionHandler = () {
+          setState(() => _isPlaying = false);
+        };
+      });
+    } else {
+      _audioPlayer.stop();
+      setState(() => _isPlaying = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<String> accelerometer =
@@ -146,10 +161,8 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
       //AlertPart Added
-      if (_bellSwitch) {
-        if (event.x > 0.1 || event.x < -0.1) {
-          _playDingOnce();
-        }
+      if (event.x > 0.1 || event.x < -0.1) {
+        _playBellSound();
       }
     }));
 
@@ -159,10 +172,8 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
       //AlertPart Added
-      if (_bellSwitch) {
-        if (event.x > 0.1 || event.x < -0.1) {
-          _playDingOnce();
-        }
+      if (event.x > 0.1 || event.x < -0.1) {
+        _playBellSound();
       }
     }));
 
@@ -173,10 +184,8 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
       //AlertPart Added
-      if (_bellSwitch) {
-        if (event.x > 0.1 || event.x < -0.1) {
-          _playDingOnce();
-        }
+      if (event.x > 0.1 || event.x < -0.1) {
+        _playBellSound();
       }
     }));
   }
