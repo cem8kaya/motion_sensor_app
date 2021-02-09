@@ -161,9 +161,7 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
       //AlertPart Added
-      if (event.x > 0.1 || event.x < -0.1) {
-        _playBellSound();
-      }
+
     }));
 
     _streamSubscriptions.add(gyroscopeEvents.listen((GyroscopeEvent event) {
@@ -172,8 +170,10 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
       //AlertPart Added
-      if (event.x > 0.1 || event.x < -0.1) {
-        _playBellSound();
+      if (_bellSwitch) {
+        if (event.x > 0.1 || event.x < -0.1) {
+          _playBellSound();
+        }
       }
     }));
 
@@ -183,10 +183,13 @@ class _MyHomePageState extends State<MyHomePage> {
         _userAccelerometerValues = <double>[event.x, event.y, event.z];
       });
 
-      //AlertPart Added
-      if (event.x > 0.1 || event.x < -0.1) {
-        _playBellSound();
+            //AlertPart Added
+      if (_bellSwitch) {
+        if (event.x > 0.1 || event.x < -0.1) {
+          _playBellSound();
+        }
       }
+
     }));
   }
 }
