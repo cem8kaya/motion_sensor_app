@@ -1,5 +1,3 @@
-//https://github.com/h4ck4life/flutter-play-sound
-
 import 'package:flutter/material.dart';
 import "package:audioplayers/audio_cache.dart";
 import 'package:audioplayers/audioplayers.dart';

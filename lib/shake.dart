@@ -1,5 +1,16 @@
 //https://github.com/deven98/shake/blob/master/lib/shake.dart
+// A flutter package to detect phone shakes.
+
+// To listen to phone shake:
+
+// ShakeDetector detector = ShakeDetector.autoStart(
+//     onPhoneShake: () {
+//         // Do stuff on phone shake
+//     }
+// );
+
 library shake;
+
 
 import 'dart:async';
 import 'dart:math';
