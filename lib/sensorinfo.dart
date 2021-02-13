@@ -1,8 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-// ignore_for_file: public_member_api_docs
+// alert sound when AccelerometerEvent event threshold is > 0.1
 
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -57,8 +53,24 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _bellSwitch = false;
   Color _bellColor = Colors.black54;
   bool _isPlaying = false;
+
   void _playDingOnce() async {
     audioCache.play('DeskBell.mp3');
+  }
+
+  void _playBellSound() async {
+    if (_isPlaying == false) {
+      setState(() => _isPlaying = true);
+      audioCache.play('Handbell-sound.mp3').then((audioPlayer) {
+        setState(() => _audioPlayer = audioPlayer);
+        audioPlayer.completionHandler = () {
+          setState(() => _isPlaying = false);
+        };
+      });
+    } else {
+      _audioPlayer.stop();
+      setState(() => _isPlaying = false);
+    }
   }
 
   @override
@@ -149,17 +161,20 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
       //AlertPart Added
-      if (_bellSwitch) {
-        if (event.x > 0.1 || event.x < -0.1) {
-          _playDingOnce();
-        }
-      }
+
     }));
 
     _streamSubscriptions.add(gyroscopeEvents.listen((GyroscopeEvent event) {
       setState(() {
         _gyroscopeValues = <double>[event.x, event.y, event.z];
       });
+
+      //AlertPart Added
+      if (_bellSwitch) {
+        if (event.x > 0.2 || event.x < -0.2 || event.y > 0.2 || event.y < -0.2 || event.z > 0.2 || event.z < -0.2) {
+          _playBellSound();
+        }
+      }
     }));
 
     _streamSubscriptions
@@ -167,6 +182,14 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         _userAccelerometerValues = <double>[event.x, event.y, event.z];
       });
+
+            //AlertPart Added
+      if (_bellSwitch) {
+        if (event.x > 0.2 || event.x < -0.2 || event.y > 0.2 || event.y < -0.2 || event.z > 0.2 || event.z < -0.2) {
+          _playBellSound();
+        }
+      }
+
     }));
   }
 }

@@ -106,8 +106,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         appBar: null,
         body: Container(
           decoration: BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage('1012.png'), repeat: ImageRepeat.repeat)),
+              image: DecorationImage(image: AssetImage('1012.png'), repeat: ImageRepeat.repeat)),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -133,7 +132,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 Container(
                   padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
                   child: Text(
-                    'Made with ♥ by Cem',
+                    'Made with ♥ by Alif',
                     style: TextStyle(
                         color: Colors.black45,
                         fontSize: 15,

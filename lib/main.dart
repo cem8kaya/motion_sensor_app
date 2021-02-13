@@ -1,28 +1,22 @@
-// alert sound when AccelerometerEvent event threshold is > 0.1
-
-import 'dart:async';
+//https://github.com/h4ck4life/flutter-play-sound
 import 'package:flutter/material.dart';
-import 'package:sensors/sensors.dart';
-
-// import 'snake.dart';
-
-//AlertPart Added
 import "package:audioplayers/audio_cache.dart";
 import 'package:audioplayers/audioplayers.dart';
+import 'package:sensors/sensors.dart';
 
-void main() {
-  runApp(MyApp());
-}
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Sensors Demo',
+      title: 'handbell',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        brightness: Brightness.dark,
+        primarySwatch: Colors.green,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Handbell'),
     );
   }
 }
@@ -36,23 +30,17 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  // static const int _snakeRows = 20;
-  // static const int _snakeColumns = 20;
-  // static const double _snakeCellSize = 10.0;
-
-  List<double> _accelerometerValues;
-  List<double> _userAccelerometerValues;
-  List<double> _gyroscopeValues;
-  List<StreamSubscription<dynamic>> _streamSubscriptions =
-      <StreamSubscription<dynamic>>[];
-
-  //AlertPart Added
+class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   AudioCache audioCache = new AudioCache();
   AudioPlayer _audioPlayer;
   bool _bellSwitch = false;
   Color _bellColor = Colors.black54;
   bool _isPlaying = false;
+
+  Animation<Color> _tweenColor;
+  Animation<double> _animation;
+  AnimationController _animationController;
+  AnimationController _colorAnimationController;
 
   void _playDingOnce() async {
     audioCache.play('DeskBell.mp3');
@@ -74,122 +62,85 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final List<String> accelerometer =
-        _accelerometerValues?.map((double v) => v.toStringAsFixed(1))?.toList();
-    final List<String> gyroscope =
-        _gyroscopeValues?.map((double v) => v.toStringAsFixed(1))?.toList();
-    final List<String> userAccelerometer = _userAccelerometerValues
-        ?.map((double v) => v.toStringAsFixed(1))
-        ?.toList();
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sensor Example'),
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          // Snake Widget
-          // Center(
-          //   child: DecoratedBox(
-          //     decoration: BoxDecoration(
-          //       border: Border.all(width: 1.0, color: Colors.black38),
-          //     ),
-          //     child: SizedBox(
-          //       height: _snakeRows * _snakeCellSize,
-          //       width: _snakeColumns * _snakeCellSize,
-          //       child: Snake(
-          //         rows: _snakeRows,
-          //         columns: _snakeColumns,
-          //         cellSize: _snakeCellSize,
-          //       ),
-          //     ),
-          //   ),
-          // ),
-
-          Padding(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text('Accelerometer: $accelerometer'),
-              ],
-            ),
-            padding: const EdgeInsets.all(16.0),
-          ),
-
-          Padding(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text('UserAccelerometer: $userAccelerometer'),
-              ],
-            ),
-            padding: const EdgeInsets.all(16.0),
-          ),
-
-          Padding(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text('Gyroscope: $gyroscope'),
-              ],
-            ),
-            padding: const EdgeInsets.all(16.0),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    for (StreamSubscription<dynamic> subscription in _streamSubscriptions) {
-      subscription.cancel();
-    }
-  }
-
-  @override
   void initState() {
     super.initState();
-
-    _streamSubscriptions
-        .add(accelerometerEvents.listen((AccelerometerEvent event) {
-      setState(() {
-        _accelerometerValues = <double>[event.x, event.y, event.z];
-      });
-
-      //AlertPart Added
-
-    }));
-
-    _streamSubscriptions.add(gyroscopeEvents.listen((GyroscopeEvent event) {
-      setState(() {
-        _gyroscopeValues = <double>[event.x, event.y, event.z];
-      });
-
-      //AlertPart Added
+    accelerometerEvents.listen((AccelerometerEvent event) {
       if (_bellSwitch) {
-        if (event.x > 0.1 || event.x < -0.1) {
+        if (event.x > 5.0 || event.x < -5.0) {
+          _animationController..forward();
           _playBellSound();
         }
       }
-    }));
+    });
 
-    _streamSubscriptions
-        .add(userAccelerometerEvents.listen((UserAccelerometerEvent event) {
-      setState(() {
-        _userAccelerometerValues = <double>[event.x, event.y, event.z];
-      });
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 500),
+    );
 
-            //AlertPart Added
-      if (_bellSwitch) {
-        if (event.x > 0.1 || event.x < -0.1) {
-          _playBellSound();
-        }
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeIn,
+      reverseCurve: Curves.easeOut,
+    );
+
+    _animation.addListener(() {
+      if (_animation.value > 0.05) {
+        _animationController..reverse();
       }
+    });
 
-    }));
+    _colorAnimationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+    _tweenColor = ColorTween(begin: Colors.black54, end: Colors.transparent)
+        .animate(_colorAnimationController);
+    _tweenColor.addListener(() {
+      setState(() => _bellColor = _tweenColor.value);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: null,
+        body: Container(
+          decoration: BoxDecoration(
+              image: DecorationImage(image: AssetImage('1012.png'), repeat: ImageRepeat.repeat)),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                GestureDetector(
+                    onTap: () {
+                      if (_bellSwitch) {
+                        _colorAnimationController..reverse();
+                        _animationController..reset();
+                        setState(() => _bellSwitch = false);
+                      } else {
+                        _colorAnimationController..forward();
+                        _animationController..forward();
+                        setState(() => _bellSwitch = true);
+                      }
+                    },
+                    child: RotationTransition(
+                      alignment: Alignment(0.0, 0.0),
+                      turns: _animation,
+                      child: Image.asset('bell.png',
+                          colorBlendMode: BlendMode.srcATop, color: _bellColor),
+                    )),
+                Container(
+                  padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
+                  child: Text(
+                    'Made with ♥ by Cem',
+                    style: TextStyle(
+                        color: Colors.black45,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ));
   }
 }
