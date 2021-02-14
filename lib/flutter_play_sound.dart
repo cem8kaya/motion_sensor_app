@@ -6,7 +6,6 @@ import 'package:sensors/sensors.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -45,6 +44,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     audioCache.play('DeskBell.mp3');
   }
 
+  void _playHandbell() async {
+    audioCache.play('Handbell-sound.mp3');
+  }
+
   void _playBellSound() async {
     if (_isPlaying == false) {
       setState(() => _isPlaying = true);
@@ -63,9 +66,30 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+
+
+    userAccelerometerEvents.listen((UserAccelerometerEvent event) {
+      if (_bellSwitch) {
+        if (event.x > 0.2 || event.x < -0.2 || event.y > 0.2 || event.y < -0.2 || event.z > 0.2 || event.z < -0.2) {
+          _animationController..forward();
+          _playBellSound();
+        }
+      }
+    });
+
+    gyroscopeEvents.listen((GyroscopeEvent event) {
+      if (_bellSwitch) {
+        if (event.x > 0.2 || event.x < -0.2 || event.y > 0.2 || event.y < -0.2 || event.z > 0.2 || event.z < -0.2) {
+          _animationController..forward();
+          _playBellSound();
+        }
+      }
+    });
+
+
     accelerometerEvents.listen((AccelerometerEvent event) {
       if (_bellSwitch) {
-        if (event.x > 5.0 || event.x < -5.0) {
+        if (event.x > 0.2 || event.x < -0.2 || event.y > 0.2 || event.y < -0.2 || event.z > 0.2 || event.z < -0.2) {
           _animationController..forward();
           _playDingOnce();
         }
@@ -130,7 +154,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 Container(
                   padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
                   child: Text(
-                    'Made with ♥ by Alif',
+                    'Made with ♥ by CEM',
                     style: TextStyle(
                         color: Colors.black45,
                         fontSize: 15,

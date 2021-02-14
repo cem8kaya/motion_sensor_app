@@ -1,14 +1,11 @@
-// alert sound when AccelerometerEvent event threshold is > 0.1
+
 
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:sensors/sensors.dart';
 
 // import 'snake.dart';
-
-//AlertPart Added
-import "package:audioplayers/audio_cache.dart";
-import 'package:audioplayers/audioplayers.dart';
+// https://github.com/flutter/plugins/tree/master/packages/sensors/example
 
 void main() {
   runApp(MyApp());
@@ -47,32 +44,6 @@ class _MyHomePageState extends State<MyHomePage> {
   List<StreamSubscription<dynamic>> _streamSubscriptions =
       <StreamSubscription<dynamic>>[];
 
-  //AlertPart Added
-  AudioCache audioCache = new AudioCache();
-  AudioPlayer _audioPlayer;
-  bool _bellSwitch = false;
-  Color _bellColor = Colors.black54;
-  bool _isPlaying = false;
-
-  void _playDingOnce() async {
-    audioCache.play('DeskBell.mp3');
-  }
-
-  void _playBellSound() async {
-    if (_isPlaying == false) {
-      setState(() => _isPlaying = true);
-      audioCache.play('Handbell-sound.mp3').then((audioPlayer) {
-        setState(() => _audioPlayer = audioPlayer);
-        audioPlayer.completionHandler = () {
-          setState(() => _isPlaying = false);
-        };
-      });
-    } else {
-      _audioPlayer.stop();
-      setState(() => _isPlaying = false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final List<String> accelerometer =
@@ -107,7 +78,6 @@ class _MyHomePageState extends State<MyHomePage> {
           //     ),
           //   ),
           // ),
-
           Padding(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -117,7 +87,6 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             padding: const EdgeInsets.all(16.0),
           ),
-
           Padding(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -127,7 +96,6 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             padding: const EdgeInsets.all(16.0),
           ),
-
           Padding(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -153,43 +121,22 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-
     _streamSubscriptions
         .add(accelerometerEvents.listen((AccelerometerEvent event) {
       setState(() {
         _accelerometerValues = <double>[event.x, event.y, event.z];
       });
-
-      //AlertPart Added
-
     }));
-
     _streamSubscriptions.add(gyroscopeEvents.listen((GyroscopeEvent event) {
       setState(() {
         _gyroscopeValues = <double>[event.x, event.y, event.z];
       });
-
-      //AlertPart Added
-      if (_bellSwitch) {
-        if (event.x > 0.2 || event.x < -0.2 || event.y > 0.2 || event.y < -0.2 || event.z > 0.2 || event.z < -0.2) {
-          _playBellSound();
-        }
-      }
     }));
-
     _streamSubscriptions
         .add(userAccelerometerEvents.listen((UserAccelerometerEvent event) {
       setState(() {
         _userAccelerometerValues = <double>[event.x, event.y, event.z];
       });
-
-            //AlertPart Added
-      if (_bellSwitch) {
-        if (event.x > 0.2 || event.x < -0.2 || event.y > 0.2 || event.y < -0.2 || event.z > 0.2 || event.z < -0.2) {
-          _playBellSound();
-        }
-      }
-
     }));
   }
 }

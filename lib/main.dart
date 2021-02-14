@@ -1,13 +1,12 @@
-//https://github.com/h4ck4life/flutter-play-sound
 import 'package:flutter/material.dart';
 import "package:audioplayers/audio_cache.dart";
 import 'package:audioplayers/audioplayers.dart';
 import 'package:sensors/sensors.dart';
+import 'dart:async';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -41,9 +40,20 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Animation<double> _animation;
   AnimationController _animationController;
   AnimationController _colorAnimationController;
+  
+  //patch
+  List<double> _accelerometerValues;
+  List<double> _userAccelerometerValues;
+  List<double> _gyroscopeValues;
+  List<StreamSubscription<dynamic>> _streamSubscriptions =
+      <StreamSubscription<dynamic>>[];
 
   void _playDingOnce() async {
     audioCache.play('DeskBell.mp3');
+  }
+
+  void _playHandbell() async {
+    audioCache.play('Handbell-sound.mp3');
   }
 
   void _playBellSound() async {
@@ -64,14 +74,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    accelerometerEvents.listen((AccelerometerEvent event) {
-      if (_bellSwitch) {
-        if (event.x > 5.0 || event.x < -5.0) {
-          _animationController..forward();
-          _playBellSound();
-        }
-      }
-    });
 
     _animationController = AnimationController(
       vsync: this,
@@ -97,21 +99,77 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     _tweenColor.addListener(() {
       setState(() => _bellColor = _tweenColor.value);
     });
+
+    userAccelerometerEvents.listen((UserAccelerometerEvent event) {
+      if (_bellSwitch) {
+        if (event.x > 0.2 || event.x < -0.2 || event.y > 0.2 || event.y < -0.2 || event.z > 0.2 || event.z < -0.2) {
+          _animationController..forward();
+          _playHandbell();
+        }
+      }
+    });
+
+    gyroscopeEvents.listen((GyroscopeEvent event) {
+      if (_bellSwitch) {
+        if (event.x > 0.2 || event.x < -0.2 || event.y > 0.2 || event.y < -0.2 || event.z > 0.2 || event.z < -0.2) {
+          _animationController..forward();
+          _playHandbell();
+        }
+      }
+    });
+
+
+    accelerometerEvents.listen((AccelerometerEvent event) {
+      if (_bellSwitch) {
+        if (event.x > 0.2 || event.x < -0.2 || event.y > 0.2 || event.y < -0.2 || event.z > 0.2 || event.z < -0.2) {
+          _animationController..forward();
+          _playHandbell();
+        }
+      }
+    });
+
+    _streamSubscriptions
+        .add(accelerometerEvents.listen((AccelerometerEvent event) {
+      setState(() {
+        _accelerometerValues = <double>[event.x, event.y, event.z];
+      });
+    }));
+    _streamSubscriptions.add(gyroscopeEvents.listen((GyroscopeEvent event) {
+      setState(() {
+        _gyroscopeValues = <double>[event.x, event.y, event.z];
+      });
+    }));
+    _streamSubscriptions
+        .add(userAccelerometerEvents.listen((UserAccelerometerEvent event) {
+      setState(() {
+        _userAccelerometerValues = <double>[event.x, event.y, event.z];
+      });
+    }));
+
   }
 
   @override
   Widget build(BuildContext context) {
+
+    final List<String> accelerometer =
+        _accelerometerValues?.map((double v) => v.toStringAsFixed(1))?.toList();
+    final List<String> gyroscope =
+        _gyroscopeValues?.map((double v) => v.toStringAsFixed(1))?.toList();
+    final List<String> userAccelerometer = _userAccelerometerValues
+        ?.map((double v) => v.toStringAsFixed(1))
+        ?.toList();
+
     return Scaffold(
         appBar: null,
         body: Container(
-          decoration: BoxDecoration(
-              image: DecorationImage(image: AssetImage('1012.png'), repeat: ImageRepeat.repeat)),
+          // decoration: BoxDecoration(
+          //     image: DecorationImage(image: AssetImage('1012.png'), repeat: ImageRepeat.repeat)),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 GestureDetector(
-                    onTap: () {
+                    onDoubleTap: () {
                       if (_bellSwitch) {
                         _colorAnimationController..reverse();
                         _animationController..reset();
@@ -125,19 +183,52 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     child: RotationTransition(
                       alignment: Alignment(0.0, 0.0),
                       turns: _animation,
-                      child: Image.asset('bell.png',
-                          colorBlendMode: BlendMode.srcATop, color: _bellColor),
+                      child: Container(
+                        child: Image.asset('bell.png',
+                            colorBlendMode: BlendMode.srcATop, 
+                            color: _bellColor,
+                            height: 150,
+                            fit:BoxFit.fill),
+                      ),
                     )),
                 Container(
                   padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
                   child: Text(
-                    'Made with ♥ by Cem',
+                    'Double tap to ring the bell or shake shake baby',
                     style: TextStyle(
-                        color: Colors.black45,
+                        color: Colors.white,
                         fontSize: 15,
                         fontWeight: FontWeight.bold),
                   ),
-                )
+                ),
+                Padding(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text('Accelerometer: $accelerometer'),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(16.0),
+                ),
+                Padding(
+                  child: Row(
+                    
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text('UserAccelerometer: $userAccelerometer'),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(16.0),
+                ),
+                Padding(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text('Gyroscope: $gyroscope'),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(16.0),
+                ),
               ],
             ),
           ),
